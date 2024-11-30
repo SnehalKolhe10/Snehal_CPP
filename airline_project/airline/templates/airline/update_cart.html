@@ -1,0 +1,107 @@
+{% extends 'airline/base_generic.html' %}
+
+{% block content %}
+<style>
+  /* Styling the container */
+  .update-cart-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 40px; /* Increased padding */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+  }
+
+  /* Header Styling */
+  .update-cart-container h1 {
+    font-size: 48px; /* Double the font size */
+    margin-bottom: 30px; /* Increased margin */
+    color: #333;
+    text-align: center;
+  }
+
+  .update-cart-container h3 {
+    font-size: 36px; /* Double the font size */
+    margin-bottom: 20px; /* Increased margin */
+    color: #555;
+    text-align: center;
+  }
+
+  /* Form container styling */
+  .update-cart-container form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .update-cart-container form div {
+    margin-bottom: 30px; /* Increased margin */
+    width: 100%;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 10px; /* Increased margin */
+    font-weight: bold;
+    font-size: 24px; /* Increased font size */
+    color: #333;
+  }
+
+  select, input {
+    width: calc(100% - 20px);
+    padding: 15px; /* Increased padding */
+    font-size: 20px; /* Increased font size */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  /* Button styling */
+  button {
+    padding: 20px 40px; /* Increased padding */
+    font-size: 24px; /* Increased font size */
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  /* Back link styling */
+  .update-cart-container a {
+    display: block;
+    margin-top: 40px; /* Increased margin */
+    text-align: center;
+    font-size: 24px; /* Increased font size */
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .update-cart-container a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<div class="update-cart-container">
+  <h1>Update Cart</h1>
+  <h3>Flight: {{ cart_item.flight.flight_number }}</h3>
+  
+  <form method="post">
+    {% csrf_token %}
+    <div>
+      <label for="id_passengers">Number of Passengers:</label>
+      {{ form.passengers }}
+    </div>
+    <button type="submit">Update</button>
+  </form>
+
+  <a href="{% url 'cart' %}">Back to Cart</a>
+</div>
+{% endblock %}

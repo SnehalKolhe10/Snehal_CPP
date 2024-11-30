@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Flights</title>
+    {% load static %}
+    <style>
+        /* General reset */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-image: url("{% static 'images/home_bg.jpg' %}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Overlay to darken the background */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: -1;
+        }
+
+        /* Main container styling */
+        .container {
+            display: flex;
+            width: 90%;
+            max-width: 1400px;
+            padding: 70px;
+            background-color: rgba(0, 0, 0, 0.85); /* Semi-transparent background */
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Search section styling */
+        .search-section {
+            width: 45%;
+            padding-right: 40px;
+            border-right: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        h1, h2 {
+            color: #FFD700;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        h1 {
+            font-size: 50px;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 40px;
+            margin-bottom: 30px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        form label {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #ddd;
+        }
+
+        form input {
+            width: 100%;
+            padding: 18px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            font-size: 22px;
+            border: 2px solid #ccc;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        form input:focus {
+            outline: none;
+            border-color: #FFD700;
+            background-color: #fff;
+        }
+
+        form button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 26px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        form button:hover {
+            background-color: #218838;
+        }
+
+        /* Flight results section styling */
+        .results-section {
+            width: 55%;
+            padding-left: 40px;
+        }
+
+        .flight-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .flight-list li {
+            background-color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 30px;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: left;
+            color: #333;
+            font-size: 24px;
+            box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .flight-list li strong {
+            font-size: 28px;
+        }
+
+        .flight-list li p {
+            margin: 10px 0;
+        }
+
+        .flight-list li a {
+            color: #007bff;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 24px;
+        }
+
+        .flight-list li a:hover {
+            text-decoration: underline;
+        }
+
+        /* No flights message styling */
+        .no-flights {
+            font-size: 28px;
+            color: #FF6347;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 40px;
+            }
+
+            .search-section, .results-section {
+                width: 100%;
+                padding: 0;
+                border: none;
+            }
+
+            .search-section {
+                margin-bottom: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+
+    <div class="container">
+        <!-- Search Section -->
+        <div class="search-section">
+            <h1>Search Flights</h1>
+            <form method="POST">
+                {% csrf_token %}
+                <label for="source">Source:</label>
+                <input type="text" name="source" id="source" required>
+
+                <label for="destination">Destination:</label>
+                <input type="text" name="destination" id="destination" required>
+
+                <label for="date">Date:</label>
+                <input type="date" name="date" id="date" required>
+
+                <label for="passengers">Passengers:</label>
+                <input type="number" name="passengers" id="passengers" value="1" min="1">
+
+                <button type="submit">Search</button>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section">
+            {% if flights %}
+                <h2>Available Flights</h2>
+                <ul class="flight-list">
+                    {% for flight in flights %}
+                        <li>
+                            <strong>{{ flight.flight_number }}: {{ flight.departure_city }} → {{ flight.arrival_city }}</strong>
+                            <p>Departure: {{ flight.departure_time }} | Arrival: {{ flight.arrival_time }}</p>
+                            <p>Duration: {{ flight.duration }} | Price: ${{ flight.price }}</p>
+                            <a href="{% url 'add_to_cart' flight.id %}">Add to Cart</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="no-flights">No flights found. Please try different search criteria or check below for default flights.</p>
+                <ul class="flight-list">
+                    {% for flight in default_flights %}
+                        <li>
+                            <strong>{{ flight.flight_number }}: {{ flight.departure_city }} → {{ flight.arrival_city }}</strong>
+                            <p>Departure: {{ flight.departure_time }} | Arrival: {{ flight.arrival_time }}</p>
+                            <p>Duration: {{ flight.duration }} | Price: ${{ flight.price }}</p>
+                            <a href="{% url 'add_to_cart' flight.id %}">Add to Cart</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

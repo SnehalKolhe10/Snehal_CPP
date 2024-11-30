@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %} <!-- Load static tag library -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Airline{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"> <!-- Example CSS file -->
+
+    <!-- Add the custom styles for larger buttons -->
+    <style>
+        /* Header and Navigation */
+        .navbar {
+            background-color: #333; /* Example background */
+            padding: 15px 0;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            justify-content: flex-end; /* Align items to the right */
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-list li {
+            padding: 0 20px; /* Horizontal padding for spacing */
+        }
+
+        .nav-list a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 2rem; /* Increased font size */
+            padding: 15px 25px; /* Padding for larger clickable area */
+            display: inline-block;
+            transition: background-color 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .nav-list a:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: url("{% static 'images/home_bg.jpg' %}") no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 2.5rem;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        h3 {
+            text-align: right;
+            margin-right: 20px;
+            font-size: 1.5rem;
+            color: #ffeb3b;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        p {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Footer Styling */
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #333;
+            color: #fff;
+        }
+
+        footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header and Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <ul class="nav-list">
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'cart' %}">Cart</a></li>
+                <li><a href="{% url 'logout' %}">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Page-specific Content -->
+    <main id="content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <!--<p>&copy; 2024 Airline Company</p>-->
+    </footer>
+</body>
+</html>

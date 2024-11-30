@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airline Page</title>
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('static/images/landing_bg.jpg'); /* Update with the correct image path */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: white; /* Ensure text is visible on the background */
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 4rem; /* Further increased font size */
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8); /* Stronger text shadow for readability */
+        }
+
+        p {
+            text-align: center;
+            font-size: 2rem; /* Increased font size for paragraphs */
+            margin: 30px;
+            line-height: 2; /* Added spacing between lines */
+        }
+
+        a {
+            color: #FFD700; /* Golden color for links */
+            text-decoration: none;
+            font-weight: bold; /* Make links stand out */
+            font-size: 2.2rem; /* Increased link font size */
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3.5rem; /* Adjust font size for smaller screens */
+            }
+
+            p {
+                font-size: 1.8rem; /* Adjust font size for smaller screens */
+                margin: 20px;
+            }
+
+            a {
+                font-size: 2rem; /* Adjust link font size for smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome To SkyBound Airline</h1>
+    <p>New user? <a href="{% url 'register' %}">Sign up</a>.</p>
+    <p>Already have an account? <a href="{% url 'login' %}">Login</a>.</p>
+</body>
+</html>

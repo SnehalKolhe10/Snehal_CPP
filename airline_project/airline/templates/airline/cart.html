@@ -1,0 +1,202 @@
+{% extends 'airline/base_generic.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* General Styling */
+  body {
+      font-family: 'Arial', sans-serif;
+      background: url("{% static 'images/home_bg.jpg' %}") no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+      color: #333;
+  }
+
+  h1 {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 5rem; /* Increased font size */
+      color: #fff;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+  }
+
+  h3 {
+      text-align: right;
+      margin-right: 40px;
+      font-size: 3rem; /* Increased font size */
+      color: #ffeb3b;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  }
+
+  p {
+      text-align: center;
+      font-size: 2rem; /* Increased font size */
+      color: #fff;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  }
+
+  /* Table Styling */
+  .cart-table {
+      width: 90%;
+      margin: 40px auto;
+      border-collapse: collapse;
+      background-color: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      overflow: hidden;
+  }
+
+  .cart-table thead {
+      background-color: #007bff;
+      color: white;
+  }
+
+  .cart-table th, .cart-table td {
+      padding: 25px; /* Increased padding */
+      text-align: left;
+      font-size: 2rem; /* Increased font size */
+  }
+
+  .cart-table tbody tr:nth-child(even) {
+      background-color: rgba(240, 240, 240, 0.9);
+  }
+
+  .cart-table tbody tr:hover {
+      background-color: rgba(220, 220, 220, 0.9);
+      cursor: pointer;
+  }
+
+  .cart-table td a {
+      color: #007bff;
+      text-decoration: none;
+      font-size: 2rem; /* Increased font size */
+  }
+
+  .cart-table td a:hover {
+      text-decoration: underline;
+  }
+
+  /* Checkout Button */
+  .checkout-container {
+      text-align: center;
+      margin-top: 40px;
+  }
+
+  .button {
+      display: inline-block;
+      padding: 20px 40px;
+      margin: 30px auto;
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+      font-size: 2.5rem; /* Increased font size */
+      border-radius: 8px;
+      text-align: center;
+      transition: background-color 0.3s, transform 0.2s;
+  }
+
+  .button:hover {
+      background-color: #218838;
+      transform: scale(1.1);
+  }
+
+  /* Navigation Buttons - Align to Right */
+  .nav-buttons {
+      text-align: right; /* Align buttons to the right */
+      margin-top: 20px;
+      margin-right: 40px;
+  }
+
+  .nav-buttons a {
+      display: inline-block;
+      padding: 15px 30px;
+      margin: 0 10px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      font-size: 1.8rem; /* Increased font size */
+      border-radius: 8px;
+      transition: background-color 0.3s, transform 0.2s;
+  }
+
+  .nav-buttons a:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+      .cart-table {
+          width: 100%;
+      }
+
+      .cart-table th, .cart-table td {
+          padding: 15px;
+          font-size: 1.2rem; /* Adjusted for mobile */
+      }
+
+      h1 {
+          font-size: 3.5rem;
+      }
+
+      h3 {
+          font-size: 2.5rem;
+      }
+
+      p {
+          font-size: 1.8rem;
+      }
+
+      .nav-buttons {
+          margin-right: 20px;
+      }
+
+      .nav-buttons a {
+          font-size: 1.5rem;
+          padding: 12px 20px;
+      }
+  }
+</style>
+
+<h1>Your Cart</h1>
+
+
+
+{% if cart %}
+  <table class="cart-table">
+    <thead>
+      <tr>
+        <th>Flight Number</th>
+        <th>Departure</th>
+        <th>Arrival</th>
+        <th>Passengers</th>
+        <th>Total Price</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in cart %}
+        <tr>
+          <td>{{ item.flight.flight_number }}</td>
+          <td>{{ item.flight.departure_city }} - {{ item.flight.departure_time|date:"d M Y, H:i" }}</td>
+          <td>{{ item.flight.arrival_city }} - {{ item.flight.arrival_time|date:"d M Y, H:i" }}</td>
+          <td>{{ item.passengers }}</td>
+          <td>${{ item.total_price }}</td>
+          <td>
+            <a href="{% url 'update_cart' item.id %}">Update</a> | 
+            <a href="{% url 'remove_from_cart' item.id %}">Remove</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3>Total Price: ${{ total_price }}</h3>
+  <div class="checkout-container">
+    <a href="{% url 'checkout' %}" class="button">Proceed to Checkout</a>
+  </div>
+{% else %}
+  <p>Your cart is empty.</p>
+{% endif %}
+{% endblock %}
