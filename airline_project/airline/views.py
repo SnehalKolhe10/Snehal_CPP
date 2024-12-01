@@ -24,34 +24,17 @@ def register(request):
 
     return render(request, 'airline/register.html', {'form': form})
 
+# Sorting function for flights by price
+def sort_prices_low_to_high(flights):
+    """Sort flights by price in ascending order."""
+    return sorted(flights, key=lambda flight: flight.price)
+
 # Home page with flight search
-# @login_required
-# def home(request):
-#     flights = None
-#     if request.method == 'POST':
-#         source = request.POST.get('source')
-#         destination = request.POST.get('destination')
-#         date = request.POST.get('date')
-
-#         if source and destination and date:
-#             # Filter flights based on user input
-#             flights = Flight.objects.filter(
-#                 departure_city__iexact=source,
-#                 arrival_city__iexact=destination,
-#                 departure_time__date=date
-#             )
-
-#     return render(request, 'airline/home.html', {'flights': flights})
-
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .models import Flight
-
 @login_required
 def home(request):
-    # Default flights (first 5 flights) when no search is performed
-    flights = Flight.objects.all()[:5]
-    
+    flights = None
+    default_flights = Flight.objects.all()[:5]  # Default flights when no search is performed
+
     if request.method == 'POST':
         source = request.POST.get('source')
         destination = request.POST.get('destination')
@@ -68,8 +51,15 @@ def home(request):
         if not flights:
             # If no flights are found, show a message
             flights = None  # This will display the "no flights found" message in the template
-    
-    return render(request, 'airline/home.html', {'flights': flights})
+
+    # If there are flights, sort them by price
+    if flights:
+        flights = sort_prices_low_to_high(flights)
+    else:
+        # If no flights match, show default flights
+        flights = default_flights
+
+    return render(request, 'airline/home.html', {'flights': flights, 'default_flights': default_flights})
 
 # Add flight to cart
 @login_required
@@ -93,6 +83,11 @@ def add_to_cart(request, flight_id):
 
     return redirect('cart')
 
+# Sorting function for cart items by price
+def sort_cart_by_price(cart_items):
+    """Sort cart items by total price in ascending order."""
+    return sorted(cart_items, key=lambda item: item.total_price)
+
 # View to display the cart
 @login_required
 def cart(request):
@@ -102,6 +97,9 @@ def cart(request):
     # Add the total price for each cart item to display in the template
     for item in user_cart:
         item.total_price = item.flight.price * item.passengers
+
+    # Sort the cart items by total price
+    user_cart = sort_cart_by_price(user_cart)
 
     return render(request, 'airline/cart.html', {'cart': user_cart, 'total_price': total_price})
 
