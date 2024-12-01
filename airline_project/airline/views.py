@@ -12,17 +12,164 @@ def landing_page(request):
     return render(request, 'airline/landing.html')  # Show login/register options for new users
 
 # Registration page
+# def register(request):
+#     if request.method == 'POST':
+#         form = UserCreationForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, f'Account created successfully! Please log in.')
+#             return redirect('login')  # Redirect to login page after successful registration
+#     else:
+#         form = UserCreationForm()
+
+#     return render(request, 'airline/register.html', {'form': form})
+
+# import boto3
+# import json
+# from django.shortcuts import render, redirect
+# from django.contrib import messages
+# from .forms import CustomUserCreationForm
+
+# # AWS Configuration
+# AWS_REGION = "us-east-1"  # e.g., "us-east-1"
+# TOPIC_NAME = "new-user-registration-topic"  # Name of your SNS topic
+
+# # AWS SNS: Create or Retrieve Topic ARN
+# def get_or_create_sns_topic(topic_name):
+#     sns_client = boto3.client('sns', region_name=AWS_REGION)
+#     response = sns_client.create_topic(Name=topic_name)
+#     return response['TopicArn']
+
+# # AWS SNS: Publish message
+# def publish_to_sns(topic_arn, message, subject=None):
+#     sns_client = boto3.client('sns', region_name=AWS_REGION)
+#     response = sns_client.publish(
+#         TopicArn=topic_arn,
+#         Message=message,
+#         Subject=subject if subject else "New User Registration"
+#     )
+#     return response
+
+# # Registration page
+# def register(request):
+#     if request.method == 'POST':
+#         form = CustomUserCreationForm(request.POST)
+#         if form.is_valid():
+#             user = form.save()
+
+#             # Save additional fields
+#             user.first_name = form.cleaned_data['first_name']
+#             user.last_name = form.cleaned_data['last_name']
+#             user.email = form.cleaned_data['email']
+#             user.save()
+
+    #         # Prepare SNS notification
+    #         try:
+    #             topic_arn = get_or_create_sns_topic(TOPIC_NAME)
+    #             sns_message = json.dumps({
+    #                 "event": "User Created",
+    #                 "username": user.username,
+    #                 "first_name": user.first_name,
+    #                 "last_name": user.last_name,
+    #                 "email": user.email,
+    #                 "phone_number": form.cleaned_data['phone_number'],
+    #             })
+
+    #             # Publish to SNS
+    #             publish_to_sns(topic_arn, sns_message, subject="New User Registered")
+    #             messages.success(request, "Account created successfully! Notification sent.")
+    #         except Exception as e:
+    #             messages.error(request, f"Account created, but failed to send notification: {str(e)}")
+
+    #         return redirect('login')
+    # else:
+    #     form = CustomUserCreationForm()
+
+    # return render(request, 'airline/register.html', {'form': form})
+    
+import boto3
+import uuid
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login, authenticate
+from django.shortcuts import render, redirect
+from django.contrib import messages
+  # Assuming you have a Custom User Creation form
+
+# AWS SNS and SQS Configuration
+TOPIC_NAME = "UserRegistrationNotifications"  # Replace with your desired topic name
+ADMIN_EMAIL = "snehalpkolhe@gmail.com"      # Replace with your admin email
+SQS_QUEUE_URL = "https://sqs.us-east-1.amazonaws.com/513189235636/PendingMails.fifo"  # Replace with your SQS URL
+
+# Create SNS topic
+def create_sns_topic(topic_name):
+    sns_client = boto3.client('sns')
+    response = sns_client.create_topic(Name=topic_name)
+    return response['TopicArn']
+
+# Subscribe email to SNS topic
+def subscribe_email_to_topic(topic_arn, email_address):
+    sns_client = boto3.client('sns')
+    sns_client.subscribe(
+        TopicArn=topic_arn,
+        Protocol='email',
+        Endpoint=email_address
+    )
+    print(f"Subscription request sent to {email_address}")
+
+# Send notification to SNS
+def send_user_creation_notification(topic_arn, username):
+    sns_client = boto3.client('sns')
+    message = f"A new user has registered with the email: {username}."
+    sns_client.publish(
+        TopicArn=topic_arn,
+        Message=message,
+        Subject="New User Registration"
+    )
+
+# Send message to SQS
+def send_message_to_sqs(username):
+    sqs_client = boto3.client('sqs')
+    # queue_url = 'https://sqs.us-east-1.amazonaws.com/513189235636/PendingMails.fifo'
+    message_body = f"New user registered with email: {username}"
+
+    response = sqs_client.send_message(
+        QueueUrl=SQS_QUEUE_URL,
+        MessageBody=message_body,
+        MessageGroupId='user-registration',
+        MessageDeduplicationId=str(uuid.uuid4())
+    )
+    print(f"Message sent to SQS: {response['MessageId']}")
+
+# Registration view for user creation
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, f'Account created successfully! Please log in.')
-            return redirect('login')  # Redirect to login page after successful registration
+            user = form.save()
+            
+
+            # Authenticate and log in the user
+            user = authenticate(username=user.username, password=form.cleaned_data['password1'])
+            if user is not None:
+                login(request, user)
+                messages.success(request, "Account created successfully! You are now logged in.")
+
+                # SNS and SQS logic
+                try:
+                    topic_arn = create_sns_topic(TOPIC_NAME)
+                    subscribe_email_to_topic(topic_arn, ADMIN_EMAIL)
+                    send_user_creation_notification(topic_arn, user.email)
+                    send_message_to_sqs(user.username)
+                except Exception as e:
+                    messages.error(request, f"Error sending notifications: {e}")
+
+                return redirect('home')
     else:
         form = UserCreationForm()
 
     return render(request, 'airline/register.html', {'form': form})
+
+
 
 # Sorting function for flights by price
 def sort_prices_low_to_high(flights):
